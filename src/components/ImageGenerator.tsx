@@ -7,11 +7,14 @@ import { useRunware } from "@/hooks/use-runware";
 import { Loader2 } from "lucide-react";
 import { Model3DViewer } from "./Model3DViewer";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 export const ImageGenerator = () => {
   const [prompt, setPrompt] = useState("");
   const { generateImage, isLoading, setApiKey, apiKey } = useRunware();
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
+  const [is3DMode, setIs3DMode] = useState(false);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -19,6 +22,7 @@ export const ImageGenerator = () => {
     try {
       const result = await generateImage({
         positivePrompt: prompt,
+        model: is3DMode ? "runware:101@1" : "runware:100@1", // Use 3D model when in 3D mode
       });
       setGeneratedImageUrl(result.imageURL);
     } catch (error) {
@@ -30,9 +34,9 @@ export const ImageGenerator = () => {
   return (
     <div className="max-w-4xl mx-auto p-8 space-y-8">
       <div className="space-y-4">
-        <h1 className="text-4xl font-bold text-center">Image Generator</h1>
+        <h1 className="text-4xl font-bold text-center">AI Generator</h1>
         <p className="text-center text-muted-foreground">
-          Enter a text prompt to generate an image
+          Generate {is3DMode ? "3D models" : "images"} from text prompts
         </p>
       </div>
 
@@ -45,9 +49,17 @@ export const ImageGenerator = () => {
             onChange={(e) => setApiKey(e.target.value)}
             className="flex-1"
           />
+          <div className="flex items-center space-x-2 mb-4">
+            <Switch
+              id="3d-mode"
+              checked={is3DMode}
+              onCheckedChange={setIs3DMode}
+            />
+            <Label htmlFor="3d-mode">Enable 3D Mode</Label>
+          </div>
           <div className="flex gap-4">
             <Input
-              placeholder="Enter your prompt..."
+              placeholder={`Enter your prompt for ${is3DMode ? "3D model" : "image"}...`}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               className="flex-1"
