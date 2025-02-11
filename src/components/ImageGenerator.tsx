@@ -6,10 +6,11 @@ import { Card } from "@/components/ui/card";
 import { useRunware } from "@/hooks/use-runware";
 import { Loader2 } from "lucide-react";
 import { Model3DViewer } from "./Model3DViewer";
+import { toast } from "sonner";
 
 export const ImageGenerator = () => {
   const [prompt, setPrompt] = useState("");
-  const { generateImage, isLoading } = useRunware();
+  const { generateImage, isLoading, setApiKey, apiKey } = useRunware();
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
 
   const handleGenerate = async () => {
@@ -21,6 +22,7 @@ export const ImageGenerator = () => {
       });
       setGeneratedImageUrl(result.imageURL);
     } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to generate image");
       console.error("Failed to generate image:", error);
     }
   };
@@ -35,24 +37,33 @@ export const ImageGenerator = () => {
       </div>
 
       <Card className="p-6 space-y-4">
-        <div className="flex gap-4">
+        <div className="space-y-4">
           <Input
-            placeholder="Enter your prompt..."
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
+            type="password"
+            placeholder="Enter your Runware API key"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
             className="flex-1"
           />
-          <Button
-            onClick={handleGenerate}
-            disabled={isLoading || !prompt.trim()}
-            className="min-w-[120px]"
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              "Generate"
-            )}
-          </Button>
+          <div className="flex gap-4">
+            <Input
+              placeholder="Enter your prompt..."
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              className="flex-1"
+            />
+            <Button
+              onClick={handleGenerate}
+              disabled={isLoading || !prompt.trim() || !apiKey.trim()}
+              className="min-w-[120px]"
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Generate"
+              )}
+            </Button>
+          </div>
         </div>
 
         {generatedImageUrl && (
